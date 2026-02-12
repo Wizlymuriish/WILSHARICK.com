@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WILSHARICK Hospital - Photo Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional styles specific to the images page */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .gallery-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.1);
+        }
+        
+        .gallery-caption {
+            padding: 1.5rem;
+        }
+        
+        .gallery-caption h3 {
+            color: #1a5fb4;
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+        
+        .gallery-caption p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 2rem 0;
+        }
+        
+        .category-btn {
+            padding: 10px 25px;
+            background: white;
+            border: 2px solid #1a5fb4;
+            color: #1a5fb4;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        .category-btn:hover,
+        .category-btn.active {
+            background: #1a5fb4;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .category-btn.all {
+            background: #e63946;
+            border-color: #e63946;
+            color: white;
+        }
+        
+        .category-btn.all:hover,
+        .category-btn.all.active {
+            background: #c1121f;
+            border-color: #c1121f;
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-image {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .lightbox-caption {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.3rem;
+            max-width: 800px;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .lightbox-close:hover {
+            transform: rotate(90deg);
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            transform: translateY(-50%);
+        }
+        
+        .lightbox-nav button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .lightbox-nav button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .image-stats {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a5fb4;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .lightbox-image {
+                max-width: 100%;
+                max-height: 70vh;
+            }
+            
+            .lightbox-nav {
+                flex-direction: column;
+                gap: 20px;
+                padding: 0 20px;
+            }
+            
+            .lightbox-nav button {
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>WILSHARICK Hospital</h1>
+        <p>Excellence in Healthcare Since 1985</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="departments.html">Departments</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="images.html" class="active">Images</a></li>
+            <li><a href="contacts.html">Contacts</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <h2>Our Hospital Gallery</h2>
+        
+        <div class="image-stats">
+            <h3>A Visual Journey Through Our Facility</h3>
+            <div class="stats-grid">
+                <div>
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Photos</div>
+                </div>
+                <div>
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Departments</div>
+                </div>
+                <div>
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div>
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Care</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="categories">
+            <button class="category-btn all active" data-category="all">All Photos</button>
+            <button class="category-btn" data-category="facility">Facility</button>
+            <button class="category-btn" data-category="staff">Our Staff</button>
+            <button class="category-btn" data-category="departments">Departments</button>
+            <button class="category-btn" data-category="patients">Patient Care</button>
+            <button class="category-btn" data-category="technology">Technology</button>
+            <button class="category-btn" data-category="emergency">Emergency</button>
+            <button class="category-btn" data-category="community">Community</button>
+        </div>
+        
+        <div class="gallery-container">
+            <!-- Facility Images -->
+            <div class="gallery-item" data-category="facility">
+                <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Hospital Building" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Our Main Building</h3>
+                    <p>Modern architecture designed for patient comfort and accessibility</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="facility">
+                <img src="https://images.unsplash.com/photo-1581595219311-269eb75f6450?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Hospital Lobby" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Welcoming Lobby</h3>
+                    <p>Spacious reception area with comfortable seating for visitors</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="facility">
+                <img src="https://images.unsplash.com/photo-1584915850129-784a9c9c8b49?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Patient Room" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Private Patient Rooms</h3>
+                    <p>Comfortable, well-equipped rooms for optimal patient recovery</p>
+                </div>
+            </div>
+            
+            <!-- Staff Images -->
+            <div class="gallery-item" data-category="staff">
+                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Medical Team" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Dedicated Medical Team</h3>
+                    <p>Our experienced doctors and nurses committed to excellence</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="staff">
+                <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Nurses" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Compassionate Nursing Staff</h3>
+                    <p>Providing round-the-clock care with empathy and professionalism</p>
+                </div>
+            </div>
+            
+            <!-- Departments Images -->
+            <div class="gallery-item" data-category="departments">
+                <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508112?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Operating Room" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Modern Operating Theater</h3>
+                    <p>State-of-the-art surgical facilities with advanced equipment</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="departments">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Laboratory" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Advanced Laboratory</h3>
+                    <p>Precise diagnostic testing with cutting-edge technology</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="departments">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Radiology" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Radiology Department</h3>
+                    <p>Comprehensive imaging services for accurate diagnosis</p>
+                </div>
+            </div>
+            
+            <!-- Patient Care Images -->
+            <div class="gallery-item" data-category="patients">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Doctor Patient" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Personalized Patient Care</h3>
+                    <p>Doctors taking time to listen and understand patient needs</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="patients">
+                <img src="https://images.unsplash.com/photo-1583324113626-19681dc93749?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Maternity" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Maternity Wing</h3>
+                    <p>Specialized care for mothers and newborns in a nurturing environment</p>
+                </div>
+            </div>
+            
+            <!-- Technology Images -->
+            <div class="gallery-item" data-category="technology">
+                <img src="https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Medical Equipment" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Advanced Medical Equipment</h3>
+                    <p>Latest technology for precise diagnosis and effective treatment</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="technology">
+                <img src="https://images.unsplash.com/photo-1581094794323-8f4f671c3a8a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="MRI Machine" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>MRI Scanner</h3>
+                    <p>High-resolution imaging for detailed medical analysis</p>
+                </div>
+            </div>
+            
+            <!-- Emergency Images -->
+            <div class="gallery-item" data-category="emergency">
+                <img src="https://images.unsplash.com/photo-1581595219311-269eb75f6450?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Emergency Room" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>24/7 Emergency Department</h3>
+                    <p>Equipped to handle critical situations with rapid response</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="emergency">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Ambulance" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Ambulance Services</h3>
+                    <p>Quick response emergency transport available round the clock</p>
+                </div>
+            </div>
+            
+            <!-- Community Images -->
+            <div class="gallery-item" data-category="community">
+                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Health Camp" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Community Health Camps</h3>
+                    <p>Free health screenings and education in local communities</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="community">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Medical Training" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Medical Training Programs</h3>
+                    <p>Investing in the next generation of healthcare professionals</p>
+                </div>
+            </div>
+            
+            <!-- Additional Facility Images -->
+            <div class="gallery-item" data-category="facility">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Cafeteria" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Hospital Cafeteria</h3>
+                    <p>Nutritious meals prepared by professional chefs for patients and visitors</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="facility">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Pharmacy" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>On-site Pharmacy</h3>
+                    <p>Convenient access to medications with professional counseling</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="departments">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Pediatric Ward" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Pediatric Ward</h3>
+                    <p>Child-friendly environment with specialized pediatric care</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="departments">
+                <img src="https://images.unsplash.com/photo-1581595219360-6397819e4ea1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="ICU" class="gallery-image">
+                <div class="gallery-caption">
+                    <h3>Intensive Care Unit</h3>
+                    <p>24/7 monitoring and critical care with specialized equipment</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Lightbox for viewing images in full size -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightbox-close">&times;</span>
+        <div class="lightbox-nav">
+            <button id="prev-btn">&lt;</button>
+            <button id="next-btn">&gt;</button>
+        </div>
+        <img src="" alt="Full size image" class="lightbox-image" id="lightbox-img">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2026 WILSHARICK Hospital. All Rights Reserved.</p>
+        <p>123 Healing Lane, Nairobi, Kenya | Emergency: +254-700-000-000</p>
+        <p>
+            <a href="home.html">Home</a>
+            <a href="departments.html">Departments</a>
+            <a href="services.html">Services</a>
+            <a href="images.html">Images</a>
+            <a href="contacts.html">Contacts</a>
+        </p>
+    </footer>
+    
+    <script>
+        // Lightbox functionality
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        let currentIndex = 0;
+        const allImages = Array.from(galleryItems);
+        
+        // Open lightbox
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    currentIndex = index;
+                    openLightbox(index);
+                }
+            });
+        });
+        
+        function openLightbox(index) {
+            const img = allImages[index].querySelector('img');
+            const caption = allImages[index].querySelector('h3').textContent;
+            
+            lightboxImg.src = img.src;
+            lightboxCaption.textContent = caption;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Close lightbox
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Navigate lightbox
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
+            openLightbox(currentIndex);
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % allImages.length;
+            openLightbox(currentIndex);
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    currentIndex = (currentIndex - 1 + allImages.length) % allImages.length;
+                    openLightbox(currentIndex);
+                } else if (e.key === 'ArrowRight') {
+                    currentIndex = (currentIndex + 1) % allImages.length;
+                    openLightbox(currentIndex);
+                }
+            }
+        });
+        
+        // Category filtering
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const galleryItemsAll = document.querySelectorAll('.gallery-item');
+        
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                const category = btn.dataset.category;
+                
+                galleryItemsAll.forEach(item => {
+                    if (category === 'all' || item.dataset.category === category) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
